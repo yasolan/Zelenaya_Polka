@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Админ{% endblock %}
+{% block content %}
+{% include "admin/_subnav.html" %}
+<h1 class="section-title">Диспетчерская</h1>
+<p class="map-hint">Курьера можно назначить на этапах «Создан» → «Собираем» — статус заказа не меняется, в списке курьера заказ появится сразу.</p>
+<div class="filters">
+  <a class="chip {% if not filter_status %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">Все</a>
+  {% for code, label in statuses %}
+  <a class="chip {% if filter_status == code %}active{% endif %}" href="{{ url_for('admin.dashboard', status=code) }}">{{ label }}</a>
+  {% endfor %}
+</div>
+<div class="table-wrap">
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Код</th>
+        <th>Клиент</th>
+        <th>Адрес</th>
+        <th>Сумма</th>
+        <th>Статус</th>
+        <th>Действия</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td><a href="{{ url_for('orders.track', code=o.public_code) }}">{{ o.public_code }}</a></td>
+        <td>{{ o.customer_name }}<br><small>{{ o.phone }}</small></td>
+        <td>{{ o.delivery_summary() }}{% if o.comment %}<br><small>{{ o.comment }}</small>{% endif %}</td>
+        <td>{{ '%.0f'|format(o.total()) }} ₽</td>
+        <td><span class="status-pill {% if o.status not in ['delivered','cancelled'] %}active{% endif %}">{{ o.status_label() }}</span></td>
+        <td>
+          <form class="inline-form" method="post" action="{{ url_for('admin.set_status', order_id=o.id, return_status=filter_status) }}">
+            <select name="status">
+              {% for code, label in statuses %}
+              <option value="{{ code }}" {% if o.status == code %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <select name="courier_id" {% if o.status not in assignable_statuses %}disabled title="Заказ завершён"{% endif %}>
+              <option value="">— курьер —</option>
+              {% for c in couriers %}
+              <option value="{{ c.id }}" {% if o.courier_id == c.id %}selected{% endif %}>{{ c.name }}</option>
+              {% endfor %}
+            </select>
+            <button type="submit" class="btn btn-primary btn-sm">Сохранить</button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="6">Заказов нет</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

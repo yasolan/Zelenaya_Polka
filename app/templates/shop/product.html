@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% from "macros/product.html" import product_thumb, product_cart_controls %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+
+<article class="panel product-detail">
+
+  <div class="product-detail-media">
+
+    {{ product_thumb(product, large=true) }}
+
+  </div>
+
+  <div class="product-detail-body">
+
+    <h1>{{ product.name }}</h1>
+
+    <p class="meta">{{ product.description }}</p>
+
+    <p class="price product-detail-price">{{ product.price_rub() }} / {{ product.unit }}</p>
+
+    {% if product.is_for_sale() %}
+    <div class="product-detail-form">
+      {{ product_cart_controls(product, detail=true) }}
+    </div>
+  {% else %}
+    <p class="catalog-season-notice catalog-season-notice--inline" role="status">Нет на складе — заказ временно недоступен.</p>
+    {% endif %}
+
+    <p class="product-detail-back"><a href="{{ url_for('shop.catalog', category=product.category) }}">← Назад в каталог</a></p>
+
+  </div>
+
+</article>
+
+{% endblock %}
+

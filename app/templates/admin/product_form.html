@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{% if product %}Редактирование{% else %}Новый товар{% endif %} — админ{% endblock %}
+{% block content %}
+{% include "admin/_subnav.html" %}
+<h1 class="section-title">{% if product %}Карточка товара{% else %}Новый товар{% endif %}</h1>
+{% if form.errors %}
+<ul class="form-errors">
+  {% for err in form.errors %}
+  <li class="flash flash-error">{{ err }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+<form class="form-stack admin-product-form" method="post" enctype="multipart/form-data">
+  <label>Название
+    <input type="text" name="name" required maxlength="120" value="{{ form.name }}">
+  </label>
+  <label>Описание
+    <textarea name="description" rows="3" maxlength="500">{{ form.description }}</textarea>
+  </label>
+  <div class="form-row">
+    <label>Цена (₽)
+      <input type="text" name="price" inputmode="decimal" required value="{{ form.price }}" placeholder="199">
+    </label>
+    <label>Остаток на складе
+      <input type="text" name="stock_qty" inputmode="decimal" required value="{{ form.stock_qty }}" placeholder="100">
+    </label>
+    <label>Единица
+      <select name="unit">
+        {% for u in units %}
+        <option value="{{ u }}" {% if form.unit == u %}selected{% endif %}>{{ u }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Категория
+      <select name="category">
+        {% for c in categories %}
+        <option value="{{ c.id }}" {% if form.category == c.id %}selected{% endif %}>{{ c.label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Эмодзи (если нет фото)
+      <input type="text" name="emoji" maxlength="8" value="{{ form.emoji }}">
+    </label>
+  </div>
+  <label>Фото (jpg/png/webp)
+    <input type="file" name="photo" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp">
+  </label>
+  <label>Или путь к файлу в static
+    <input type="text" name="image" value="{{ form.image }}" placeholder="img/products/example.jpg">
+  </label>
+  <p class="map-hint">Загруженный файл сохранится в <code>static/img/products/</code> и заменит путь ниже.</p>
+  <div class="form-actions">
+    <button type="submit" class="btn btn-primary">Сохранить</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin.products') }}">Отмена</a>
+  </div>
+</form>
+{% endblock %}

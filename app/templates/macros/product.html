@@ -1,0 +1,116 @@
+{% macro product_thumb(product, large=false) %}
+
+{% if product.image %}
+
+<div class="card-photo-frame{% if large %} card-photo-frame--lg{% endif %}">
+
+  <img
+
+    class="card-photo"
+
+    src="{{ url_for('static', filename=product.image) }}"
+
+    alt="{{ product.name }}"
+
+    loading="lazy"
+
+    decoding="async"
+
+  >
+
+</div>
+
+{% else %}
+
+<div class="card-emoji"{% if large %} style="font-size: 4rem;"{% endif %}>{{ product.emoji }}</div>
+
+{% endif %}
+
+{% endmacro %}
+
+
+
+{% macro product_cart_controls(product, detail=false, stepper_only=false) %}
+
+{% set qty = (cart_quantities|default({})).get(product.id, 0) %}
+
+{% set in_cart = qty > 0 or stepper_only %}
+
+<div
+
+  class="card-cart{% if detail %} card-cart--detail{% endif %}{% if stepper_only %} card-cart--table{% endif %}"
+
+  data-product-id="{{ product.id }}"
+
+  data-step="{{ product.sell_step() }}"
+
+  data-min="{{ product.sell_min() }}"
+
+  data-unit="{{ product.unit }}"
+
+  data-cart-url="{{ url_for('shop.cart_item_api', product_id=product.id) }}"
+
+  data-stock-max="{{ product.max_order_qty() }}"
+
+>
+
+  {% if not stepper_only %}
+  <button type="button" class="card-cart__cta btn btn-primary{% if not detail %} btn-sm{% endif %}" {% if in_cart %}hidden{% endif %}>
+
+    В корзину
+
+  </button>
+  {% endif %}
+
+  <div class="card-cart__stepper qty-stepper" {% if not in_cart %}hidden{% endif %}>
+
+    <button type="button" class="qty-stepper__btn qty-stepper__btn--minus" aria-label="Уменьшить количество">−</button>
+
+    <div class="qty-stepper__readout">
+
+      <span class="qty-stepper__value" data-qty-display>{{ (qty if in_cart else product.sell_default_qty())|qty_format }}</span>
+
+      <span class="qty-stepper__unit">{{ product.unit }}</span>
+
+    </div>
+
+    <button type="button" class="qty-stepper__btn qty-stepper__btn--plus" aria-label="Увеличить количество">+</button>
+
+  </div>
+
+</div>
+
+{% endmacro %}
+
+
+
+{% macro product_thumb_sm(product) %}
+
+{% if product.image %}
+
+<img
+
+  class="cart-thumb"
+
+  src="{{ url_for('static', filename=product.image) }}"
+
+  alt=""
+
+  width="48"
+
+  height="48"
+
+  loading="lazy"
+
+  decoding="async"
+
+>
+
+{% else %}
+
+<span class="cart-thumb cart-thumb--emoji" aria-hidden="true">{{ product.emoji }}</span>
+
+{% endif %}
+
+{% endmacro %}
+

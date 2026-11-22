@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Курьер{% endblock %}
+{% block content %}
+<h1 class="section-title">Мои доставки</h1>
+{% for o in orders %}
+<article class="panel">
+  <p><strong>{{ o.public_code }}</strong> — <span class="status-pill active">{{ o.status_label() }}</span></p>
+  <p>{{ o.delivery_summary() }}</p>
+  <p>{{ o.customer_name }}, {{ o.phone }}</p>
+  {% if o.comment %}<p><em>Комментарий: {{ o.comment }}</em></p>{% endif %}
+  {% if o.status in ['confirmed', 'picking'] %}
+  <p class="map-hint" style="margin-bottom:0;">Заказ собирается — ждите статус «Передан курьеру» от диспетчера.</p>
+  {% elif o.status == 'assigned' %}
+  <form method="post" action="{{ url_for('courier.advance', order_id=o.id) }}">
+    <button type="submit" class="btn btn-primary">Взял заказ</button>
+  </form>
+  {% elif o.status == 'on_the_way' %}
+  <form method="post" action="{{ url_for('courier.advance', order_id=o.id) }}">
+    <button type="submit" class="btn btn-primary">Доставлено</button>
+  </form>
+  {% endif %}
+</article>
+{% else %}
+<p>Активных доставок нет.</p>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,61 @@
+{% from "macros/icon.html" import nav_icon %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Зелёная полка{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header site-header--minimal">
+    <div class="header-inner">
+      <a class="brand brand--horizontal" href="{{ url_for('shop.index') }}" aria-label="Зелёная полка — на главную">
+        <img class="brand-icon" src="{{ url_for('static', filename='icons/brand-shelf.svg') }}" alt="" width="48" height="48" decoding="async">
+        <span class="brand-wordmark">Зелёная полка</span>
+      </a>
+      <nav class="nav nav--icons" aria-label="Основная навигация">
+        {% if nav.catalog %}<a class="nav-icon" href="{{ url_for('shop.catalog') }}" data-tip="Каталог" aria-label="Каталог">{{ nav_icon('catalog') }}</a>{% endif %}
+        {% if nav.zone %}<a class="nav-icon" href="{{ url_for('shop.delivery_zone') }}" data-tip="Зона доставки" aria-label="Зона доставки">{{ nav_icon('map') }}</a>{% endif %}
+        {% if nav.track %}<a class="nav-icon" href="{{ url_for('orders.track') }}" data-tip="Отследить заказ" aria-label="Отследить заказ">{{ nav_icon('track') }}</a>{% endif %}
+        {% if nav.cart %}
+        <a class="nav-icon nav-icon--cart" href="{{ url_for('shop.cart_view') }}" data-tip="Корзина" aria-label="Корзина">
+          {{ nav_icon('cart') }}
+          {% if cart_count %}<span class="badge badge--nav">{{ cart_count }}</span>{% endif %}
+        </a>
+        {% endif %}
+        {% if nav.addresses %}<a class="nav-icon" href="{{ url_for('account.addresses') }}" data-tip="Мои адреса" aria-label="Адреса">{{ nav_icon('addresses') }}</a>{% endif %}
+        {% if nav.picker %}<a class="nav-icon" href="{{ url_for('picker.dashboard') }}" data-tip="Сборка" aria-label="Сборка">{{ nav_icon('picker') }}</a>{% endif %}
+        {% if nav.courier %}<a class="nav-icon" href="{{ url_for('courier.home') }}" data-tip="Курьер" aria-label="Курьер">{{ nav_icon('courier') }}</a>{% endif %}
+        {% if nav.admin %}<a class="nav-icon" href="{{ url_for('admin.dashboard') }}" data-tip="Админ" aria-label="Админ">{{ nav_icon('admin') }}</a>{% endif %}
+        {% if nav.login %}<a class="nav-icon" href="{{ url_for('auth.login') }}" data-tip="Войти" aria-label="Войти">{{ nav_icon('login') }}</a>{% endif %}
+        {% if nav.logout %}<a class="nav-icon" href="{{ url_for('auth.logout') }}" data-tip="Выйти" aria-label="Выйти">{{ nav_icon('logout') }}</a>{% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flash-messages">
+          {% for category, message in messages %}
+            <li class="flash flash-{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+  <p>© Зелёная полка — доставка свежих овощей и фруктов. Учебный проект.</p>
+  </footer>
+  <script src="{{ url_for('static', filename='js/card-cart.js') }}" defer></script>
+  <script src="{{ url_for('static', filename='js/flash-messages.js') }}" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

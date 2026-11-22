@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Сборка{% endblock %}
+{% block content %}
+<h1 class="section-title">Панель сборки</h1>
+<p class="map-hint">Отслеживание и статусы сборки (без назначения курьеров).</p>
+<div class="filters">
+  <a class="chip {% if not filter_status %}active{% endif %}" href="{{ url_for('picker.dashboard') }}">Активные</a>
+  {% for code, label in statuses %}
+    {% if code in picker_statuses %}
+  <a class="chip {% if filter_status == code %}active{% endif %}" href="{{ url_for('picker.dashboard', status=code) }}">{{ label }}</a>
+    {% endif %}
+  {% endfor %}
+</div>
+<div class="table-wrap">
+  <table class="data">
+    <thead>
+      <tr>
+        <th>Код</th>
+        <th>Клиент</th>
+        <th>Адрес</th>
+        <th>Статус</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td><a href="{{ url_for('orders.track', code=o.public_code) }}">{{ o.public_code }}</a></td>
+        <td>{{ o.customer_name }}</td>
+        <td>{{ o.delivery_summary() }}</td>
+        <td><span class="status-pill active">{{ o.status_label() }}</span></td>
+        <td>
+          {% if o.status in picker_statuses %}
+          <form method="post" action="{{ url_for('picker.advance', order_id=o.id) }}">
+            <button type="submit" class="btn btn-primary btn-sm">
+              {% if o.status == 'new' %}Подтвердить{% elif o.status == 'confirmed' %}Начать сборку{% else %}Собрано{% endif %}
+            </button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="5">Заказов нет</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

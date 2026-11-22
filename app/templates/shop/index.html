@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% from "macros/product.html" import product_thumb, product_cart_controls %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+
+<section class="hero">
+
+  <h1>Свежий урожай — на вашу полку</h1>
+
+  <p>Овощи, фрукты, зелень и ягоды с доставкой в день заказа. Выберите категорию или откройте весь каталог.</p>
+
+  <a class="btn btn-primary" href="{{ url_for('shop.catalog') }}">Открыть каталог</a>
+
+  <a class="btn btn-secondary" href="{{ url_for('shop.delivery_zone') }}">Зона и магазины</a>
+
+  <a class="btn btn-secondary" href="{{ url_for('orders.track') }}">Отследить заказ</a>
+
+</section>
+
+
+
+{% for block in catalog_sections %}
+
+<section class="catalog-home-block">
+
+  <div class="catalog-home-block__head">
+
+    <h2 class="section-title section-title--inline">{{ block.category.label }}</h2>
+
+    <a class="chip chip--ghost" href="{{ url_for('shop.catalog', category=block.category.id) }}">Все {{ block.category.label|lower }}</a>
+
+  </div>
+
+  <div class="product-grid">
+
+    {% for product in block.products %}
+
+    <article class="card">
+
+      {{ product_thumb(product) }}
+
+      <h3><a href="{{ url_for('shop.product_detail', product_id=product.id) }}">{{ product.name }}</a></h3>
+
+      <p class="meta">{{ product.description }}</p>
+
+      <p class="price">{{ product.price_rub() }} / {{ product.unit }}</p>
+
+      {{ product_cart_controls(product) }}
+
+    </article>
+
+    {% endfor %}
+
+  </div>
+
+</section>
+
+{% endfor %}
+
+{% endblock %}
+

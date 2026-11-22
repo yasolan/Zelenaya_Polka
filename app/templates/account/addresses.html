@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Мои адреса{% endblock %}
+{% block content %}
+<h1 class="section-title">Сохранённые адреса</h1>
+<div class="store-list">
+  {% for a in addresses %}
+  <div class="store-card">
+    <strong>{{ a.title }}{% if a.is_default %} · по умолчанию{% endif %}</strong>
+    <p>{{ a.address }}</p>
+    <p class="map-hint">
+      {% if a.entrance %}подъезд {{ a.entrance }} {% endif %}
+      {% if a.floor %}эт. {{ a.floor }} {% endif %}
+      {% if a.apartment %}кв. {{ a.apartment }} {% endif %}
+    </p>
+    <form method="post" action="{{ url_for('account.addresses') }}">
+      <input type="hidden" name="action" value="delete">
+      <input type="hidden" name="address_id" value="{{ a.id }}">
+      <button type="submit" class="btn btn-secondary btn-sm">Удалить</button>
+    </form>
+  </div>
+  {% else %}
+  <p>Пока нет сохранённых адресов — оформите заказ и отметьте «Сохранить адрес».</p>
+  {% endfor %}
+</div>
+{% endblock %}

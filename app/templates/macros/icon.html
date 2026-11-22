@@ -1,0 +1,5 @@
+{% macro nav_icon(name) %}
+<svg class="nav-svg" width="22" height="22" aria-hidden="true" focusable="false">
+  <use href="{{ url_for('static', filename='icons/nav.svg') }}#{{ name }}"></use>
+</svg>
+{% endmacro %}

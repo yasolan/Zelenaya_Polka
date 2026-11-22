@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Оформление{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+{% endblock %}
+{% block content %}
+<h1 class="section-title">Оформление доставки</h1>
+<div class="panel">
+  <p>К оплате: <strong>{{ '%.0f'|format(total) }} ₽</strong> (наличные или перевод курьеру)</p>
+</div>
+<form class="form-stack panel" method="post" action="{{ url_for('shop.checkout') }}" id="checkout-form">
+  <label>Имя<input type="text" name="customer_name" required autocomplete="name"></label>
+  <label>Телефон<input type="tel" name="phone" required placeholder="+7 ..." autocomplete="tel"></label>
+
+  {% if saved_addresses %}
+  <div class="saved-address-pick panel" style="padding:1rem;margin-bottom:0;">
+    <span class="field-label">Сохранённые адреса</span>
+    <div class="saved-address-list">
+      {% for a in saved_addresses %}
+      <button type="button" class="btn btn-secondary btn-sm saved-address-btn"
+        data-address="{{ a.address }}"
+        data-lat="{{ a.delivery_lat or '' }}"
+        data-lon="{{ a.delivery_lon or '' }}"
+        data-entrance="{{ a.entrance }}"
+        data-floor="{{ a.floor }}"
+        data-apartment="{{ a.apartment }}"
+        data-intercom="{{ a.intercom }}">{{ a.title }}</button>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="map-section">
+    <span class="field-label">Адрес на карте</span>
+    <p class="map-hint">Кликните <strong>внутри красного контура</strong> — адрес дома подставится автоматически. Подъезд и квартиру укажите в полях ниже.</p>
+    <script id="delivery-map-data" type="application/json">{{ map_data|tojson }}</script>
+    <div id="delivery-map" class="delivery-map delivery-map-interactive" data-interactive="1"></div>
+    <p id="zone-status" class="map-hint zone-status" style="display:none;" role="status"></p>
+    <p id="address-display" class="address-selected">Точка на карте не выбрана</p>
+    <input type="hidden" id="address-input" name="address" value="" required>
+    <input type="hidden" name="delivery_lat" id="delivery-lat">
+    <input type="hidden" name="delivery_lon" id="delivery-lon">
+    <p class="map-hint"><a href="{{ url_for('shop.delivery_zone') }}">Список магазинов на карте</a></p>
+  </div>
+
+  <fieldset class="address-extra">
+    <legend>Уточните доставку</legend>
+    <div class="address-extra-grid">
+      <label>Подъезд<input type="text" name="entrance" inputmode="numeric" autocomplete="off" placeholder="1"></label>
+      <label>Этаж<input type="text" name="floor" inputmode="numeric" autocomplete="off" placeholder="5"></label>
+      <label>Квартира<input type="text" name="apartment" autocomplete="off" placeholder="42"></label>
+      <label>Домофон<input type="text" name="intercom" autocomplete="off" placeholder="42К"></label>
+    </div>
+  </fieldset>
+
+  <label>Комментарий курьеру<textarea name="comment" rows="2" placeholder="Время, пожелания, как найти подъезд"></textarea></label>
+  {% if current_user.is_authenticated and current_user.role in ['user', 'admin'] %}
+  <label class="checkbox-row"><input type="checkbox" name="save_address" value="1" checked> Сохранить адрес в профиль</label>
+  {% endif %}
+  <button type="submit" class="btn btn-primary">Подтвердить заказ</button>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="{{ url_for('static', filename='js/delivery-map.js') }}"></script>
+<script src="{{ url_for('static', filename='js/saved-address.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from "macros/product.html" import product_thumb_sm %}
+{% block title %}Каталог — админ{% endblock %}
+{% block content %}
+{% include "admin/_subnav.html" %}
+<div class="admin-products-head">
+  <h1 class="section-title section-title--inline">Каталог и стоп-лист</h1>
+  <a class="btn btn-primary" href="{{ url_for('admin.product_new') }}">Новый товар</a>
+</div>
+<p class="map-hint">Стоп-лист скрывает товар в каталоге и не даёт добавить его в корзину. Снятие с продажи не удаляет карточку — можно вернуть в любой момент.</p>
+<div class="filters">
+  <a class="chip {% if not filter_stock %}active{% endif %}" href="{{ url_for('admin.products') }}">Все</a>
+  <a class="chip {% if filter_stock == 'active' %}active{% endif %}" href="{{ url_for('admin.products', stock='active') }}">В продаже</a>
+  <a class="chip {% if filter_stock == 'stopped' %}active{% endif %}" href="{{ url_for('admin.products', stock='stopped') }}">Стоп-лист</a>
+</div>
+<div class="table-wrap">
+  <table class="data">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Название</th>
+        <th>Категория</th>
+        <th>Цена</th>
+        <th>На складе</th>
+        <th>Статус</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+      <tr class="{% if not p.is_active %}row-muted{% endif %}">
+        <td>{{ product_thumb_sm(p) }}</td>
+        <td>
+          <strong>{{ p.name }}</strong>
+          {% if not p.catalog_managed %}<span class="tag tag--soft">свой</span>{% endif %}
+          {% if p.description %}<br><small>{{ p.description }}</small>{% endif %}
+        </td>
+        <td>{{ p.category }}</td>
+        <td>{{ p.price_rub() }}/{{ p.unit }}</td>
+        <td>
+          <form class="inline-form stock-inline" method="post" action="{{ url_for('admin.product_set_stock', product_id=p.id, return_stock=filter_stock) }}">
+            <input type="text" name="stock_qty" value="{{ p.stock_amount()|qty_format }}" inputmode="decimal" aria-label="Остаток {{ p.name }}">
+            <button type="submit" class="btn btn-sm btn-ghost">OK</button>
+          </form>
+        </td>
+        <td>
+          {% if p.is_active %}
+          <span class="status-pill active">В продаже</span>
+          {% else %}
+          <span class="status-pill">Стоп</span>
+          {% endif %}
+        </td>
+        <td class="admin-product-actions">
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('admin.product_edit', product_id=p.id) }}">Изменить</a>
+          {% if p.is_active %}
+          <a class="btn btn-ghost btn-sm" href="{{ url_for('shop.product_detail', product_id=p.id) }}" target="_blank" rel="noopener">На сайте</a>
+          {% endif %}
+          <form method="post" action="{{ url_for('admin.product_toggle_active', product_id=p.id, return_stock=filter_stock) }}">
+            <button type="submit" class="btn btn-sm {% if p.is_active %}btn-ghost{% else %}btn-primary{% endif %}">
+              {% if p.is_active %}В стоп{% else %}Вернуть{% endif %}
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="7">Нет товаров по выбранному фильтру.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

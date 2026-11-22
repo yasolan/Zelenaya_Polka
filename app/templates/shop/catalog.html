@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% from "macros/product.html" import product_thumb, product_cart_controls %}
+
+{% block title %}{% if category_meta %}{{ category_meta.label }}{% else %}Каталог{% endif %}{% endblock %}
+
+{% block content %}
+
+<h1 class="section-title">{% if category_meta %}{{ category_meta.label }}{% else %}Каталог{% endif %}</h1>
+
+{% if category == 'ягоды' %}
+
+<p class="catalog-lead">Свежие ягоды мы привозим только в сезон — сейчас в каталоге их нет.</p>
+
+<div class="catalog-season-notice" role="status">
+
+  <p class="catalog-season-notice__title">Сейчас не сезон</p>
+
+  <p>Клубника, малина, черника и смеси появятся ближе к лету, когда начнётся сбор. Загляните в разделы <a href="{{ url_for('shop.catalog', category='овощи') }}">овощей</a> и <a href="{{ url_for('shop.catalog', category='фрукты') }}">фруктов</a> — там полный ассортимент на сегодня.</p>
+
+</div>
+
+{% elif category_meta %}
+
+<p class="catalog-lead">Свежие позиции категории «{{ category_meta.label }}» — добавьте в корзину и оформите доставку в зону «Зелёной полки».</p>
+
+{% else %}
+
+<p class="catalog-lead">Овощи, фрукты, зелень и ягоды — выберите категорию или смотрите весь ассортимент.</p>
+
+{% endif %}
+
+<div class="filters" role="navigation" aria-label="Категории каталога">
+
+  <a class="chip {% if not category %}active{% endif %}" href="{{ url_for('shop.catalog') }}">Все</a>
+
+  {% for cat in catalog_categories %}
+
+  <a class="chip {% if category == cat.id %}active{% endif %}" href="{{ url_for('shop.catalog', category=cat.id) }}">{{ cat.label }}</a>
+
+  {% endfor %}
+
+</div>
+
+{% if category != 'ягоды' %}
+
+<div class="product-grid">
+
+  {% for product in products %}
+
+  <article class="card">
+
+    {{ product_thumb(product) }}
+
+    <h3><a href="{{ url_for('shop.product_detail', product_id=product.id) }}">{{ product.name }}</a></h3>
+
+    <p class="meta"><span class="product-cat">{% for c in catalog_categories %}{% if c.id == product.category %}{{ c.label }}{% endif %}{% endfor %}</span> · {{ product.description }}</p>
+
+    <p class="price">{{ product.price_rub() }} / {{ product.unit }}</p>
+
+    {{ product_cart_controls(product) }}
+
+  </article>
+
+  {% else %}
+
+  <p>В этой категории пока нет товаров.</p>
+
+  {% endfor %}
+
+</div>
+
+{% endif %}
+
+{% endblock %}
+

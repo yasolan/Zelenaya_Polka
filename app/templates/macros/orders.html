@@ -1,0 +1,10 @@
+{% macro order_list_item(order, selected_order) %}
+<a class="active-orders-item{% if selected_order and selected_order.id == order.id %} active-orders-item--current{% endif %}" href="{{ url_for('orders.track', code=order.public_code) }}">
+  <span class="active-orders-item__code">{{ order.public_code }}</span>
+  <span class="active-orders-item__meta">
+    <span class="status-pill{% if order.status not in ('cancelled',) %} active{% endif %}">{{ order.status_label() }}</span>
+    <span class="active-orders-item__sum">{{ '%.0f'|format(order.total()) }} ₽</span>
+  </span>
+  <span class="active-orders-item__date">{{ order.updated_at|minsk_time('%d.%m.%Y %H:%M') }}</span>
+</a>
+{% endmacro %}

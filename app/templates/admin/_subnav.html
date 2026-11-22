@@ -1,0 +1,4 @@
+<nav class="admin-subnav" aria-label="Разделы админки">
+  <a class="chip {% if admin_tab == 'orders' %}active{% endif %}" href="{{ url_for('admin.dashboard') }}">Заказы</a>
+  <a class="chip {% if admin_tab == 'products' %}active{% endif %}" href="{{ url_for('admin.products') }}">Каталог и стоп-лист</a>
+</nav>

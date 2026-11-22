@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Вход{% endblock %}
+{% block content %}
+<div class="auth-panel panel">
+  <h1 class="section-title">Вход</h1>
+  <form class="form-stack" method="post" action="{{ url_for('auth.login', next=request.args.get('next')) }}">
+    <label>Логин<input type="text" name="username" required autocomplete="username"></label>
+    <label>Пароль<input type="password" name="password" required autocomplete="current-password"></label>
+    <button type="submit" class="btn btn-primary">Войти</button>
+  </form>
+  <p class="map-hint" style="margin-top:1rem;">Демо: user1, user2, user3, admin (пароль = логин)</p>
+</div>
+{% endblock %}

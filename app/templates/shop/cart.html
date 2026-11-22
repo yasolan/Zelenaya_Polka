@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% from "macros/product.html" import product_thumb_sm, product_cart_controls %}
+
+{% block title %}Корзина{% endblock %}
+
+{% block content %}
+
+<h1 class="section-title">Корзина</h1>
+
+{% if stock_notes %}
+<ul class="flash-messages">
+  {% for note in stock_notes %}
+  <li class="flash flash-error">{{ note }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if items %}
+
+<div class="table-wrap cart-page">
+
+  <table class="data" id="cart-table">
+
+    <thead>
+
+      <tr>
+
+        <th>Товар</th>
+
+        <th>Цена</th>
+
+        <th>Кол-во</th>
+
+        <th>Сумма</th>
+
+      </tr>
+
+    </thead>
+
+    <tbody>
+
+      {% for row in items %}
+
+      <tr data-cart-row data-product-id="{{ row.product.id }}">
+
+        <td class="cart-item-name">{{ product_thumb_sm(row.product) }} {{ row.product.name }}</td>
+
+        <td>{{ row.product.price_rub() }}</td>
+
+        <td class="cart-qty-cell">
+
+          {{ product_cart_controls(row.product, stepper_only=true) }}
+
+        </td>
+
+        <td class="cart-line-total" data-line-total>{{ '%.0f'|format(row.line_total) }} ₽</td>
+
+      </tr>
+
+      {% endfor %}
+
+    </tbody>
+
+  </table>
+
+</div>
+
+<p class="cart-total" data-cart-total>Итого: <strong>{{ '%.0f'|format(total) }} ₽</strong></p>
+
+<div class="cart-actions">
+
+  <a class="btn btn-primary" href="{{ url_for('shop.checkout') }}">Оформить заказ</a>
+
+</div>
+
+{% else %}
+
+<p>Корзина пуста. <a href="{{ url_for('shop.catalog') }}">Перейти в каталог</a></p>
+
+{% endif %}
+
+{% endblock %}
+

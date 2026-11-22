@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Зона доставки{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+{% endblock %}
+{% block content %}
+<h1 class="section-title">Зона доставки и наши пункты</h1>
+
+<div class="store-list">
+  {% for store in map_data.stores %}
+  <div class="store-card">
+    <strong>{{ store.name }}</strong>
+    <p>{{ store.address }}</p>
+  </div>
+  {% endfor %}
+</div>
+
+<script id="delivery-map-data" type="application/json">{{ map_data|tojson }}</script>
+<div id="delivery-map" class="delivery-map delivery-map-page" data-interactive="0"></div>
+
+<p class="map-hint"><a href="{{ url_for('shop.catalog') }}">Перейти в каталог</a> · <a href="{{ url_for('shop.checkout') }}">Оформить доставку</a></p>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="{{ url_for('static', filename='js/delivery-map.js') }}"></script>
+{% endblock %}

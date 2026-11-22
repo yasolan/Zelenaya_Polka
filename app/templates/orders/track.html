@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% from "macros/orders.html" import order_list_item %}
+
+{% block title %}Отследить заказ{% endblock %}
+
+{% block content %}
+
+<h1 class="section-title">Отследить заказ</h1>
+{% set viewing_active = order and order.status not in ['delivered', 'cancelled'] %}
+
+{% if not current_user.is_authenticated %}
+
+<p class="catalog-lead">Войдите в аккаунт, чтобы видеть активные и прошлые заказы.</p>
+
+<p><a class="btn btn-primary" href="{{ url_for('auth.login', next=request.path) }}">Войти</a></p>
+
+{% elif show_customer_lists %}
+<section class="active-orders" aria-labelledby="active-orders-title">
+
+  <h2 id="active-orders-title" class="section-title section-title--sm">Ваши активные заказы</h2>
+
+  {% if active_orders %}
+
+  <ul class="active-orders-list">
+
+    {% for o in active_orders %}
+
+    <li>{{ order_list_item(o, order) }}</li>
+
+    {% endfor %}
+
+  </ul>
+
+  {% else %}
+
+  <p class="catalog-lead">Сейчас нет заказов в работе — оформите доставку из <a href="{{ url_for('shop.catalog') }}">каталога</a>.</p>
+
+  {% endif %}
+
+</section>
+
+
+
+{% if not viewing_active %}
+
+<section class="active-orders" aria-labelledby="previous-orders-title">
+
+  <h2 id="previous-orders-title" class="section-title section-title--sm">Ваши предыдущие заказы</h2>
+
+  {% if previous_orders %}
+
+  <ul class="active-orders-list">
+
+    {% for o in previous_orders %}
+
+    <li>{{ order_list_item(o, order) }}</li>
+
+    {% endfor %}
+
+  </ul>
+
+  {% else %}
+
+  <p class="catalog-lead">Завершённых заказов пока нет.</p>
+
+  {% endif %}
+
+</section>
+
+{% endif %}
+
+{% endif %}
+
+
+
+{% if order %}
+
+<div class="panel track-order-panel">
+
+  <p><strong>{{ order.public_code }}</strong> · {{ order.customer_name }}</p>
+
+  <p>{{ order.delivery_summary() }}</p>
+
+  {% if order.comment %}<p><em>Комментарий: {{ order.comment }}</em></p>{% endif %}
+
+  {% if order.show_courier_eta() %}
+
+  <div class="courier-eta-panel" id="courier-eta-panel"
+
+       data-deadline="{{ utc_iso_z(order.courier_eta_deadline()) }}">
+
+    <p class="courier-eta-title">Курьер в пути</p>
+
+    <p class="courier-eta-text">Будет у вас примерно через <strong id="courier-eta-countdown">—</strong> <span class="courier-eta-note">(±30 мин после «Взял заказ»)</span></p>
+
+    <p class="courier-eta-sub">Ориентир: до {{ order.courier_eta_deadline()|minsk_time('%H:%M') }}</p>
+
+  </div>
+
+  {% endif %}
+
+  <p>Текущий статус: <span class="status-pill active">{{ order.status_label() }}</span></p>
+
+  <p>Сумма: {{ '%.0f'|format(order.total()) }} ₽</p>
+
+</div>
+
+
+
+<h2 class="section-title">История статусов</h2>
+
+<ul class="timeline">
+
+  {% for step, label in statuses %}
+
+    {% set is_current = order.status == step %}
+
+    <li class="{% if order.status_was_reached(step) %}done{% endif %} {% if is_current %}current{% endif %}">
+
+      <strong>{{ label }}</strong>
+
+      {% for ev in order.status_history %}
+
+        {% if ev.status == step %}
+
+        <div class="time">{{ ev.created_at|minsk_time }}{% if ev.note %} — {{ ev.note }}{% endif %}</div>
+
+        {% endif %}
+
+      {% endfor %}
+
+    </li>
+
+  {% endfor %}
+
+</ul>
+
+
+
+<h2 class="section-title">Состав</h2>
+
+<div class="table-wrap">
+
+  <table class="data">
+
+    <thead><tr><th>Товар</th><th>Кол-во</th><th>Сумма</th></tr></thead>
+
+    <tbody>
+
+      {% for item in order.items %}
+
+      <tr>
+
+        <td>{{ item.product.emoji }} {{ item.product.name }}</td>
+
+        <td>{{ item.quantity }} {{ item.product.unit }}</td>
+
+        <td>{{ '%.0f'|format(item.line_total()) }} ₽</td>
+
+      </tr>
+
+      {% endfor %}
+
+    </tbody>
+
+  </table>
+
+</div>
+
+{% elif current_user.is_authenticated and show_customer_lists and not active_orders and not previous_orders %}
+
+<p class="catalog-lead">У вас ещё не было заказов. Начните с <a href="{{ url_for('shop.catalog') }}">каталога</a>.</p>
+
+{% elif current_user.is_authenticated and current_user.role in ['picker', 'courier'] and not order %}
+
+<p class="catalog-lead">Откройте заказ по номеру из панели сборки или курьера.</p>
+
+{% endif %}
+
+
+
+{% if show_customer_lists and viewing_active %}
+
+<section class="active-orders" aria-labelledby="previous-orders-below-title">
+
+  <h2 id="previous-orders-below-title" class="section-title section-title--sm">Ваши предыдущие заказы</h2>
+
+  {% if previous_orders %}
+
+  <ul class="active-orders-list">
+
+    {% for o in previous_orders %}
+
+    <li>{{ order_list_item(o, order) }}</li>
+
+    {% endfor %}
+
+  </ul>
+
+  {% else %}
+
+  <p class="catalog-lead">Завершённых заказов пока нет.</p>
+
+  {% endif %}
+
+</section>
+
+{% endif %}
+
+{% endblock %}
+
+
+
+{% block scripts %}
+
+{% if order and order.show_courier_eta() %}
+
+<script src="{{ url_for('static', filename='js/courier-eta.js') }}"></script>
+
+{% endif %}
+
+{% endblock %}
+
